@@ -1,3 +1,5 @@
+//SALES_DATA_H Sales_data.h
+//ss
 #ifndef SALES_DATA_H
 #define SALES_DATA_H
 #include <string>
@@ -58,8 +60,7 @@ std::istream &operator>>(std::istream &in,Sales_data &rhs)
                 std::string::size_type sz;
                 rhs.revenue = std::stod(word,&sz);
             }
-            else
-            {
+            else{
                 std::string::size_type sz;
                 rhs.units_sold = std::stoi(word,&sz);
             }
