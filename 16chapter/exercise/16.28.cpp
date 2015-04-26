@@ -9,7 +9,16 @@ class debug_delete{
         template<typename T>
         void operator()(T *p)const
         {
-            os << "deleting unique_ptr:"<< *p  << std::endl;
+            os << "delete unique_ptr:" << std::endl;
+            delete p;
+        }
+};
+class default_delete{
+    public:
+        default_delete(){}
+        template<typename T>
+        void operator()(T *p)const
+        {
             delete p;
         }
 };
@@ -30,6 +39,9 @@ class SharedPtr
         SharedPtr &operator=(const std::shared_ptr<T> &);
         T &operator*(){
             return *p;
+        }
+        T *operator->()const{
+            return &this->operator*();
         }
         ~SharedPtr();
 };
@@ -55,7 +67,7 @@ SharedPtr<T> &SharedPtr<T>::operator=(const SharedPtr<T> &rhs){
     SharedPtr<T> temp(rhs);
     if(!--*use_cnt)
     {
-        dev?dev(p):(std::cout << "delete:" << *p << std::endl, delete(p));
+        dev?dev(p):(std::cout << "delete:" << std::endl, delete(p));
         delete use_cnt;
     }
     p = *temp.p;
@@ -75,16 +87,44 @@ SharedPtr<T>::~SharedPtr(){
     std::cout << *p << " use_cnt:" << *use_cnt << std::endl;
     if(!--*use_cnt)
     {
-        dev?dev(p):(std::cout << "delete:" << *p << std::endl, delete(p));
+        dev?dev(p):(std::cout << "delete:" << std::endl, delete(p));
         delete use_cnt;
     }
 }
+template <typename T,typename Q = default_delete>
+class UniquePtr{
+    private:
+        T *p;
+        Q dev = Q();
+    public:
+        UniquePtr():p(nullptr){}
+        UniquePtr(Q q):p(nullptr),dev(q){}
+        UniquePtr(T *pt):p(pt){}
+        UniquePtr &operator=(const UniquePtr &);
+        void reset(T *pt = nullptr);
+        T *release(){
+            std::cout << "release" << std::endl;
+            T *pt = p;
+            p = nullptr;
+            return pt;
+        }
+        ~UniquePtr(){
+            if(p)
+                std::cout << "delete:" << *p << std::endl;
+            else
+                std::cout << "delete" << std::endl;
+            dev(p);
+        }
+};
+template<typename T>
+void my_delete(T *p){
+    std::cout << "my_deletle" << std::endl;
+    delete p;
+}
 int main()
 {
-    SharedPtr<int> spt1(new int(5),debug_delete());
-    SharedPtr<std::string> spt2(std::make_shared<std::string>("sss"));
-    SharedPtr<std::string> spt = spt2;
-    SharedPtr<std::string> spt3(spt);
-    std::cout << *spt << std::endl;
+    auto q =std::function<void(int *)>(my_delete<int>);
+    int *ps = new int(6);
+    q(ps);
     return 0;
 }
