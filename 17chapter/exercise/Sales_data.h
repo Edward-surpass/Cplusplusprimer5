@@ -3,12 +3,9 @@
 #include <string>
 #include <iostream>
 #include <sstream>
-#include <hash_map>
 class Sales_data {
-    friend struct std::hash<Sales_data>;
     friend std::ostream &operator<<(std::ostream &,const Sales_data &);
     friend std::istream &operator>>(std::istream &,Sales_data &);
-    friend bool operator==(const Sales_data &lhs,const Sales_data &rhs);
 public:
     Sales_data():units_sold(0), revenue(0.0) {}
     Sales_data(const std::string &s):bookNo(s), units_sold(0), revenue(0.0){}
@@ -38,12 +35,5 @@ inline bool compareIsbn(const Sales_data &lhs, const Sales_data &rhs)
 {
     return lhs.isbn() < rhs.isbn();
 }
-namespace std{
-template <>
-struct hash<Sales_data>{
-    typedef size_t result_type;
-    typedef Sales_data argument_type;
-    size_t operator()(const Sales_data &)const;
-};
-}
+
 #endif
